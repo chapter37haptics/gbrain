@@ -1,6 +1,6 @@
 # Brain-First Lookup Convention
 
-**Read this before doing ANY entity/person/company/fact lookup.**
+**Read this before doing ANY entity/goal/decision/process/concept lookup.**
 
 Sub-agents and fresh sessions inherit gbrain tools but not the knowledge of
 when and how to use them. This file is that knowledge.
@@ -56,15 +56,13 @@ Standard directory structure:
 
 | Directory | Type | Example |
 |-----------|------|---------|
-| `people/` | person | `people/paul-graham.md` |
-| `companies/` | company | `companies/stripe.md` |
-| `deals/` | deal | `deals/stripe-series-c.md` |
-| `meetings/` | meeting | `meetings/2026-04-23-weekly-sync.md` |
-| `projects/` | project | `projects/gbrain.md` |
-| `yc/` | yc | `yc/batch-w26.md` |
+| `goals/` | goal | `goals/setup-jwt-auth.md` |
+| `decisions/` | decision | `decisions/chose-postgres-over-sqlite.md` |
+| `processes/` | process | `processes/deploy-to-production.md` |
+| `concepts/` | concept | `concepts/event-sourcing.md` |
 
 When creating new pages, include proper frontmatter with `type`, `title`,
-and `tags` fields.
+and `tags` fields. See `skills/_brain-filing-rules.md` for page templates.
 
 ## When Spawning Further Sub-agents
 
