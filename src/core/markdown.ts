@@ -361,6 +361,9 @@ function inferType(filePath?: string): PageType {
   if (lower.includes('/deals/') || lower.includes('/deal/')) return 'deal';
   if (lower.includes('/yc/')) return 'yc';
   if (lower.includes('/civic/')) return 'civic';
+  if (lower.includes('/goals/') || lower.includes('/goal/')) return 'goal';
+  if (lower.includes('/decisions/') || lower.includes('/decision/')) return 'decision';
+  if (lower.includes('/processes/') || lower.includes('/process/')) return 'process';
   if (lower.includes('/projects/') || lower.includes('/project/')) return 'project';
   if (lower.includes('/sources/') || lower.includes('/source/')) return 'source';
   if (lower.includes('/media/')) return 'media';

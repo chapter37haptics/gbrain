@@ -301,4 +301,24 @@ Some content.`;
     expect(parseMarkdown('', 'writing/post.md').type).toBe('writing');
     expect(parseMarkdown('', 'projects/blog/writing/essay.md').type).toBe('writing');
   });
+
+  test('inferType: goals/ → goal', () => {
+    const result = parseMarkdown('---\ntitle: Test\n---\nBody', 'goals/setup-jwt-auth.md');
+    expect(result.type).toBe('goal');
+  });
+
+  test('inferType: decisions/ → decision', () => {
+    const result = parseMarkdown('---\ntitle: Test\n---\nBody', 'decisions/chose-postgres.md');
+    expect(result.type).toBe('decision');
+  });
+
+  test('inferType: processes/ → process', () => {
+    const result = parseMarkdown('---\ntitle: Test\n---\nBody', 'processes/deploy-to-prod.md');
+    expect(result.type).toBe('process');
+  });
+
+  test('inferType: decisions/ under projects/ → decision (longest prefix)', () => {
+    const result = parseMarkdown('---\ntitle: Test\n---\nBody', 'projects/my-app/decisions/use-redis.md');
+    expect(result.type).toBe('decision');
+  });
 });
