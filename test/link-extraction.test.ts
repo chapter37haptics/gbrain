@@ -129,6 +129,38 @@ describe('extractEntityRefs', () => {
     const refs = extractEntityRefs('[[goals/setup-jwt-auth|Setup JWT]]');
     expect(refs).toEqual([{ name: 'Setup JWT', slug: 'goals/setup-jwt-auth', dir: 'goals' }]);
   });
+
+  test('extractEntityRefs: decisions/ wikilink (no alias)', () => {
+    const refs = extractEntityRefs('[[decisions/email-chain-pattern-priority]]');
+    expect(refs).toEqual([{ name: 'decisions/email-chain-pattern-priority', slug: 'decisions/email-chain-pattern-priority', dir: 'decisions' }]);
+  });
+
+  test('extractEntityRefs: processes/ wikilink with alias', () => {
+    const refs = extractEntityRefs('[[processes/render-eml-to-screenshot|Render Flow]]');
+    expect(refs).toEqual([{ name: 'Render Flow', slug: 'processes/render-eml-to-screenshot', dir: 'processes' }]);
+  });
+
+  test('extractEntityRefs: goal page body with mixed entity links', () => {
+    const body = 'See [email chain detection](concepts/email-chain-detection) for pattern details. ' +
+      'Related: [Setup JWT](goals/setup-jwt-auth).';
+    const refs = extractEntityRefs(body);
+    expect(refs).toHaveLength(2);
+    expect(refs[0]).toEqual({ name: 'email chain detection', slug: 'concepts/email-chain-detection', dir: 'concepts' });
+    expect(refs[1]).toEqual({ name: 'Setup JWT', slug: 'goals/setup-jwt-auth', dir: 'goals' });
+  });
+
+  test('extractEntityRefs: links inside code blocks are ignored', () => {
+    const body = '```\n[Goal](goals/fake-goal)\n```';
+    const refs = extractEntityRefs(body);
+    expect(refs).toEqual([]);
+  });
+
+  test('extractEntityRefs: VC dirs still work after DIR_PATTERN expansion', () => {
+    const refs = extractEntityRefs('[Alice](people/alice) works at [Acme](companies/acme).');
+    expect(refs).toHaveLength(2);
+    expect(refs[0].dir).toBe('people');
+    expect(refs[1].dir).toBe('companies');
+  });
 });
 
 // ─── extractPageLinks ──────────────────────────────────────────

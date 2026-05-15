@@ -321,4 +321,24 @@ Some content.`;
     const result = parseMarkdown('---\ntitle: Test\n---\nBody', 'projects/my-app/decisions/use-redis.md');
     expect(result.type).toBe('decision');
   });
+
+  test('inferType: realistic goal slug from real spec', () => {
+    const result = parseMarkdown('---\ntitle: Email Chain Bounding Box Detection\n---\nBody', 'goals/email-chain-bounding-box-detection.md');
+    expect(result.type).toBe('goal');
+  });
+
+  test('inferType: realistic concept slug from real spec', () => {
+    const result = parseMarkdown('---\ntitle: Email Chain Detection\n---\nBody', 'concepts/email-chain-detection.md');
+    expect(result.type).toBe('concept');
+  });
+
+  test('inferType: frontmatter type overrides path inference', () => {
+    const result = parseMarkdown('---\ntype: decision\ntitle: Test\n---\nBody', 'goals/email-chain-bounding-box.md');
+    expect(result.type).toBe('decision');
+  });
+
+  test('inferType: decisions-log/ does NOT match decisions/ (no false positive)', () => {
+    const result = parseMarkdown('---\ntitle: Test\n---\nBody', 'projects/foo/decisions-log/bar.md');
+    expect(result.type).toBe('project');
+  });
 });
