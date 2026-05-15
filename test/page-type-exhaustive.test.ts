@@ -19,7 +19,10 @@ describe('PageType exhaustiveness contract', () => {
     // If a PageType is added without updating ALL_PAGE_TYPES, this test
     // anchors the requirement. The compile-time check is in the union itself;
     // this is the runtime sanity gate.
-    expect(ALL_PAGE_TYPES.length).toBeGreaterThan(0);
+    expect(ALL_PAGE_TYPES.length).toBe(25);
+    expect(ALL_PAGE_TYPES).toContain('goal');
+    expect(ALL_PAGE_TYPES).toContain('decision');
+    expect(ALL_PAGE_TYPES).toContain('process');
     // Sentinel: every entry is a non-empty string.
     for (const t of ALL_PAGE_TYPES) {
       expect(typeof t).toBe('string');
