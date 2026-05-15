@@ -15,7 +15,7 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 |---------|-------|
 | "What do we know about", "tell me about", "search for", "who is", "background on", "notes on" | `skills/query/SKILL.md` |
 | "Who knows who", "relationship between", "connections", "graph query" | `skills/query/SKILL.md` (use graph-query) |
-| Creating/enriching a person or company page | `skills/enrich/SKILL.md` |
+| Creating/enriching a goal, decision, process, or concept page | `skills/enrich/SKILL.md` |
 | Where does a new file go? Filing rules | `skills/repo-architecture/SKILL.md` |
 | Fix broken citations in brain pages | `skills/citation-fixer/SKILL.md` |
 | "citation audit", "check citations", "fix citations" | `skills/citation-fixer/SKILL.md` (focused fix). For broader brain health, chain into `skills/maintain/SKILL.md` |
@@ -27,7 +27,7 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 
 | Trigger | Skill |
 |---------|-------|
-| User shares a link, article, tweet, or idea | `skills/idea-ingest/SKILL.md` |
+| User shares a link, article, or idea | `skills/idea-ingest/SKILL.md` |
 | "watch this video", "process this YouTube link", "ingest this PDF", "save this podcast", "process this book", "summarize this book", "PDF book", "ingest it into my brain", "what's in this screenshot", "check out this repo" | `skills/media-ingest/SKILL.md` |
 | Meeting transcript received | `skills/meeting-ingestion/SKILL.md` |
 | Generic "ingest this" (auto-routes to above) | `skills/ingest/SKILL.md` |
@@ -57,7 +57,7 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 | "Skillify this", "is this a skill?", "make this proper" | `skills/skillify/SKILL.md` |
 | "Compress my resolver", "AGENTS.md too large", "RESOLVER.md too big", "functional area dispatcher", "shrink routing table" | `skills/functional-area-resolver/SKILL.md` |
 | "Is gbrain healthy?", morning health check, skillpack-check | `skills/skillpack-check/SKILL.md` |
-| Post-restart health + auto-fix, "did the container restart break anything", smoke test | `skills/smoke-test/SKILL.md` |
+| Post-restart health + auto-fix, smoke test | `skills/smoke-test/SKILL.md` |
 | Cross-modal review, second opinion | `skills/cross-modal-review/SKILL.md` |
 | "Validate skills", skill health check | `skills/testing/SKILL.md` |
 | Webhook setup, external event processing | `skills/webhook-transforms/SKILL.md` |
@@ -94,7 +94,7 @@ This is the dispatcher. Skills are the implementation. **Read the skill file bef
 When multiple skills could match:
 1. Prefer the most specific skill (meeting-ingestion over ingest)
 2. If the user mentions a URL, route by content type (link → idea-ingest, video → media-ingest)
-3. If the user mentions a person/company, check if enrich or query fits better
+3. If the user mentions a goal/decision/process/concept, check if enrich or query fits better
 4. Chaining is explicit in each skill's Phases section
 5. When in doubt, ask the user (see `skills/ask-user/SKILL.md` for the choice-gate pattern)
 
@@ -122,4 +122,3 @@ These apply to ALL brain-writing skills:
 | "verify this academic claim", "check this study", "academic verify", "validate citation", "is this study real" | `skills/academic-verify/SKILL.md` |
 | "make pdf from brain", "brain pdf", "convert brain page to pdf", "publish this page as pdf", "export brain page" | `skills/brain-pdf/SKILL.md` |
 | "voice note", "ingest this voice memo", "transcribe and file", "voice note ingest", "save this audio note" | `skills/voice-note-ingest/SKILL.md` |
-
