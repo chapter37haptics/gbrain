@@ -436,25 +436,25 @@ Fix quality.md first. Every file that delegates to it inherits the fix.
 | 5 | `skills/conventions/brain-first.md` | Header (line 1), entity conventions table (lines 57-64): add `goals/`, `decisions/`, `processes/` rows, replace VC-only rows (`deals/`, `yc/`), keep `concepts/` | RETRIEVE | Agent needs slug-construction guidance for developer directories |
 | 6 | `skills/conventions/quality.md` | Iron Law (line 25): generalize to "any entity with a brain page". Notability Gate (lines 34-36): add criteria for goals, decisions, processes, concepts (with junk-drawer prevention for concepts/). Example (line 40): replace VC example | WRITE | Root of the delegation chain. All other files inherit from this |
 
-#### Code/config files to PATCH (2)
+#### Code/config files to PATCH (4)
 
 | # | File | What changes | Loop Phase |
 |---|------|-------------|-----------|
 | 7 | `src/core/link-extraction.ts` | Add `goals\|decisions\|processes` to `DIR_PATTERN` regex at line 46 (`concepts` already present) | STORE (auto-link) |
 | 8 | `skills/_brain-filing-rules.json` | Add `goal`, `decision`, and `process` kind entries + update `dream_synthesize_paths.globs` for `goals/`, `decisions/`, and `processes/` | STORE (dream cycle) |
+| 9 | `src/core/types.ts` | Add `goal`, `decision`, and `process` to `PageType` union + `ALL_PAGE_TYPES` array. Compile-time prerequisite: without this, markdown.ts and any code assigning developer types fails typecheck | ALL (compile-time gate) |
+| 10 | `src/core/markdown.ts` `inferType()` | Add `goals/`, `decisions/`, `processes/` directory mappings. Longest-prefix ordering: check `decisions/` before `projects/` for hybrid paths | STORE (type inference) |
 
 #### Unchanged (1)
 
 | # | File | Loop Phase | Why safe |
 |---|------|-----------|---------|
-| 10 | `skills/_output-rules.md` | PRESENT | Rules are genuinely domain-neutral. "Deterministic links", "No slop", "Exact phrasing preservation" work for any entity type. Examples are VC-flavored but illustrative, not behavioral gates |
+| 11 | `skills/_output-rules.md` | PRESENT | Rules are genuinely domain-neutral. "Deterministic links", "No slop", "Exact phrasing preservation" work for any entity type. Examples are VC-flavored but illustrative, not behavioral gates |
 
 ### Tier 2: Important but not loop-breaking
 
 | File | Change | Priority |
 |------|--------|----------|
-| `src/core/types.ts` `PageType` union | Add `goal`, `decision`, and `process` to the type union + `ALL_PAGE_TYPES`. Compile-time break without this | **HIGH (Tier 1)** |
-| `src/core/markdown.ts` `inferType()` | Add `goals/`, `decisions/`, and `processes/` directory mappings | **HIGH (Tier 1)** |
 | `src/commands/doctor.ts` graph_coverage | Expand `type IN (...)` clause to include developer types | Low |
 | `brain-ops/SKILL.md` Phase 2.5 | Add developer relationship types (uses, depends_on, decided_in) as examples | Low |
 
@@ -478,16 +478,20 @@ Fix quality.md first. Every file that delegates to it inherits the fix.
 
 ## Execution Order
 
-1. **quality.md** first (root of delegation chain, every other file inherits)
-2. **brain-ops/SKILL.md** second (the loop engine)
-3. **signal-detector/SKILL.md** (detection layer)
-4. **_brain-filing-rules.md** + **_brain-filing-rules.json** (filing taxonomy)
-5. **RESOLVER.md** (routing table)
-6. **brain-first.md** (retrieval conventions)
-7. **link-extraction.ts** (auto-link code)
-8. **types.ts** (PageType union — compile-time prerequisite for markdown.ts)
-9. **markdown.ts** `inferType()` (longest-prefix ordering for hybrid paths)
-10. Tier 2 code changes (doctor.ts) if time allows
+Code-layer changes land first so that skill-layer changes can be tested
+immediately without transient type errors or missing auto-links.
+
+1. **types.ts** first (compile-time prerequisite — without this, any code assigning `goal`/`decision`/`process` fails typecheck)
+2. **markdown.ts** `inferType()` (type inference must resolve developer directories before pages can be imported)
+3. **link-extraction.ts** (auto-link code — graph edges for developer directories)
+4. **quality.md** (root of delegation chain, every skill file inherits)
+5. **brain-ops/SKILL.md** (the loop engine — 8 hard-gate sites)
+6. **signal-detector/SKILL.md** (detection layer)
+7. **_brain-filing-rules.md** + **_brain-filing-rules.json** (filing taxonomy)
+8. **RESOLVER.md** (routing table)
+9. **brain-first.md** (retrieval conventions)
+10. **Verify:** `grep -rn 'PageType\|ALL_PAGE_TYPES' src/ --include='*.ts'` to audit for hidden type consumers (switches, whitelists, filters) not named in this manifest. Fix any that gate on the old set.
+11. Tier 2 code changes (doctor.ts) if time allows
 
 ## Page Templates
 
@@ -733,13 +737,13 @@ than claiming no cross-machine concerns exist.
 
 ### Changes required by architecture audit
 
-Added to the change manifest:
+Incorporated into the change manifest (Tier 1 code/config section, items #9-#10):
 
 | # | File | What changes | Tier |
 |---|------|-------------|------|
-| NEW | `src/core/types.ts` | Add `goal` + `decision` + `process` to `PageType` union and `ALL_PAGE_TYPES` | Tier 1 (compile-time break) |
+| #9 | `src/core/types.ts` | Add `goal` + `decision` + `process` to `PageType` union and `ALL_PAGE_TYPES` | Tier 1 (compile-time break) |
+| #10 | `src/core/markdown.ts` `inferType()` | Longest-prefix ordering for hybrid paths | Tier 1 |
 | NOTE | entrypoint.sh (out of scope) | Drop 2 files from array — follow-up in devcontainer repo | N/A |
-| UPDATED | `src/core/markdown.ts` `inferType()` | Moved from Tier 2 to Tier 1 — ordering matters for hybrid paths | Tier 1 |
 
 ## Reviews
 
@@ -825,4 +829,37 @@ processes, concepts) sound?
 **Impact on spec:** Narrowed scope accepted. Added structured debug-trail
 timeline entry format to the project page template. Added concepts/
 notability criteria to quality.md patch requirements.
+
+### Codex review 6: PR review (gpt-5.3-codex)
+
+**Question:** Full PR review of the spec (logical gaps, feasibility, MECE,
+execution order, risk).
+
+**Verdict:** PASS (no P1 findings). 5 findings, 3 addressed:
+
+1. **Tier inconsistency (FIXED).** `types.ts` and `markdown.ts` were listed
+   under Tier 2 but marked "HIGH (Tier 1)". Implementers could skip compile-time
+   prerequisites. Fix: moved both to Tier 1 code/config section (items #9, #10).
+   Removed from Tier 2 table.
+
+2. **Execution order risk (FIXED).** Skill-layer changes (quality.md, brain-ops)
+   were sequenced before code-layer changes (types.ts, markdown.ts,
+   link-extraction.ts). If tested incrementally, the agent would try to write
+   `goal`-type pages before the type union supports them. Fix: reordered
+   execution to code-layer first (steps 1-3), then skill-layer (steps 4-9).
+
+3. **Missing PageType audit step (FIXED).** Spec named specific files but didn't
+   require a grep pass for all `PageType` consumers (switches, whitelists,
+   filters in diagnostics and tests). Hidden consumers could reject developer
+   types. Fix: added verification step 10 to execution order:
+   `grep -rn 'PageType\|ALL_PAGE_TYPES' src/ --include='*.ts'`.
+
+4. **CE weakness (NOTED, not fixed).** Collective exhaustiveness holds only if
+   scope is strictly "goal-driven developer memory." External docs and long-lived
+   project context are implicitly forced into goals/concepts. Acceptable for v1
+   scope — add explicit boundary statement if scope expands.
+
+5. **CLAUDE.md PR surface area (NOTED, not fixed).** For a spec-only PR,
+   replacing CLAUDE.md and adding a 1.4k-line backup is noise. Cosmetic — does
+   not affect the spec's correctness or implementation.
 
