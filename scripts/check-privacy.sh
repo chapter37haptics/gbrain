@@ -97,6 +97,7 @@ fi
 ALLOW_LIST=(
   'scripts/check-privacy.sh'
   'CLAUDE.md'
+  'CLAUDE-original-read-only.md'
   'llms-full.txt'
   'docs/UPGRADING_DOWNSTREAM_AGENTS.md'
   'test/integrations.test.ts'
