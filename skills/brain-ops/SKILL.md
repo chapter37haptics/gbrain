@@ -19,11 +19,10 @@ tools:
 mutating: true
 writes_pages: true
 writes_to:
-  - people/
-  - companies/
-  - deals/
+  - goals/
+  - decisions/
+  - processes/
   - concepts/
-  - meetings/
 ---
 
 # Brain Operations — The Ambient Context Layer
@@ -46,7 +45,7 @@ This skill guarantees:
 
 ## Iron Law: Back-Linking (MANDATORY)
 
-Every mention of a person or company with a brain page MUST create a back-link
+Every mention of an entity with a brain page MUST create a back-link
 FROM that entity's page TO the page mentioning them. An unlinked mention is a
 broken brain. See `skills/conventions/quality.md` for format.
 
@@ -54,7 +53,7 @@ broken brain. See `skills/conventions/quality.md` for format.
 
 ### Phase 1: Brain-First Lookup (MANDATORY)
 
-Before using ANY external API to research a person, company, or topic:
+Before using ANY external API to research a goal, decision, process, or concept:
 
 1. `gbrain search "name"` — keyword search for existing pages
 2. `gbrain query "natural question about name"` — hybrid search for context
@@ -66,9 +65,9 @@ The brain almost always has something. External APIs fill gaps, not start from s
 
 ### Phase 2: On Every Inbound Signal (READ → ENRICH → WRITE)
 
-Every message, meeting, email, or conversation that references a person or company:
+Every message or conversation that references a goal, decision, process, or concept:
 
-1. **Detect entities** — people, companies, deals mentioned
+1. **Detect entities** — goals, decisions, processes, concepts mentioned
 2. **Load brain pages** — read existing pages for context before responding
 3. **Identify new information** — what does this signal tell us that the page doesn't know?
 4. **Write it back** — update the brain page with new info + timeline entry + source citation
@@ -85,8 +84,8 @@ to the graph (`links` table) with inferred relationship types. Stale links
 "auto-link" reconciliation.
 
 - No manual `add_link` calls needed for ordinary page writes.
-- Inferred link types: `attended` (meeting -> person), `works_at`, `invested_in`,
-  `founded`, `advises`, `source` (frontmatter), `mentions` (default).
+- Inferred link types: `uses` (goal -> concept), `decided_in` (decision -> goal),
+  `depends_on` (process -> concept), `source` (frontmatter), `mentions` (default).
 - The `put_page` MCP response includes `auto_links: { created, removed, errors }`
   so the agent can verify outcomes.
 - To disable: `gbrain config set auto_link false`. Default is on.
@@ -95,7 +94,7 @@ to the graph (`links` table) with inferred relationship types. Stale links
 
 ### Phase 3: On Every Outbound Response (READ → PULL → RESPOND)
 
-Before answering any question about a person, company, or topic:
+Before answering any question about a goal, decision, process, or concept:
 
 1. **Check the brain** — read relevant pages
 2. **Pull context** — use compiled truth + recent timeline
@@ -108,8 +107,8 @@ Don't answer from general knowledge when a brain page exists.
 This is not a special mode. This is the default. Everything the user says is an
 ingest event.
 
-- Person mentioned → check brain, create/enrich if needed (spawn background)
-- Company mentioned → same
+- Goal mentioned → check brain, create/update if needed (spawn background)
+- Decision/process/concept mentioned → same
 - Link shared → ingest it (delegate to idea-ingest)
 - Data shared → delegate to appropriate skill
 
@@ -144,7 +143,7 @@ the citation is `[gstack:plans/foo]`. That's the whole rule.
 
 ## Anti-Patterns
 
-- Answering questions about people/companies without checking the brain first
+- Answering questions about goals/decisions/processes/concepts without checking the brain first
 - Using external APIs before checking the brain
 - Writing facts without inline `[Source: ...]` citations
 - Blocking the response to do enrichment
