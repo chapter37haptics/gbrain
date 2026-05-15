@@ -84,6 +84,9 @@ describe('PageType exhaustiveness contract', () => {
         case 'code': return 'code';
         case 'image': return 'asset';
         case 'synthesis': return 'doc';
+        case 'goal': return 'work';
+        case 'decision': return 'doc';
+        case 'process': return 'doc';
         default: return assertNever(t);
       }
     }
