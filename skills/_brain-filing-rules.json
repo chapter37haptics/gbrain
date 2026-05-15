@@ -34,6 +34,24 @@
       "description": "A reusable idea, framework, or mental model not tied to a specific person/company."
     },
     {
+      "kind": "goal",
+      "directory": "goals/",
+      "examples": ["development tasks", "/goal executions", "debug sessions"],
+      "description": "One /goal execution arc: what was attempted, what happened, decisions made, debug trails, what was learned. The primary authoring unit — capture here first, promote out when reusable."
+    },
+    {
+      "kind": "decision",
+      "directory": "decisions/",
+      "examples": ["architecture choices", "tool selections", "tradeoff resolutions"],
+      "description": "A durable technical choice that governs future work beyond one goal. ADR-style: context, options considered, decision, consequences."
+    },
+    {
+      "kind": "process",
+      "directory": "processes/",
+      "examples": ["deploy workflows", "setup procedures", "migration runbooks"],
+      "description": "A canonical reproducible procedure that is handoff-worthy. Graduates to a skill file after 2-3 successful reuses with only argument changes."
+    },
+    {
       "kind": "project",
       "directory": "projects/",
       "examples": ["internal initiatives", "multi-session work"],
@@ -159,7 +177,10 @@
       "wiki/originals/*",
       "wiki/personal/patterns/*",
       "wiki/people/*",
-      "dream-cycle-summaries/*"
+      "dream-cycle-summaries/*",
+      "goals/*",
+      "decisions/*",
+      "processes/*"
     ]
   }
 }
