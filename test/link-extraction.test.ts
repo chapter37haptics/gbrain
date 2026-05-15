@@ -109,6 +109,26 @@ describe('extractEntityRefs', () => {
     expect(refs.length).toBe(1);
     expect(refs[0].dir).toBe('meetings');
   });
+
+  test('extractEntityRefs: goals/ directory link', () => {
+    const refs = extractEntityRefs('[Setup JWT](goals/setup-jwt-auth)');
+    expect(refs).toEqual([{ name: 'Setup JWT', slug: 'goals/setup-jwt-auth', dir: 'goals' }]);
+  });
+
+  test('extractEntityRefs: decisions/ directory link', () => {
+    const refs = extractEntityRefs('[Chose Postgres](decisions/chose-postgres)');
+    expect(refs).toEqual([{ name: 'Chose Postgres', slug: 'decisions/chose-postgres', dir: 'decisions' }]);
+  });
+
+  test('extractEntityRefs: processes/ directory link', () => {
+    const refs = extractEntityRefs('[Deploy Flow](processes/deploy-to-prod)');
+    expect(refs).toEqual([{ name: 'Deploy Flow', slug: 'processes/deploy-to-prod', dir: 'processes' }]);
+  });
+
+  test('extractEntityRefs: goals/ wikilink', () => {
+    const refs = extractEntityRefs('[[goals/setup-jwt-auth|Setup JWT]]');
+    expect(refs).toEqual([{ name: 'Setup JWT', slug: 'goals/setup-jwt-auth', dir: 'goals' }]);
+  });
 });
 
 // ─── extractPageLinks ──────────────────────────────────────────
