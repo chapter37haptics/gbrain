@@ -863,3 +863,9 @@ execution order, risk).
    replacing CLAUDE.md and adding a 1.4k-line backup is noise. Cosmetic — does
    not affect the spec's correctness or implementation.
 
+### Codex review 7: `/goal` integration gap
+
+See `docs/specs/customized-domain/experiment-log.md` Experiment 1 for the
+full finding, cross-model analysis, and fix. Moved out of the spec because
+it is an experimental observation, not a normative spec decision.
+
