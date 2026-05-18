@@ -218,3 +218,242 @@ pressure. The real fixes (#1-#3) require either:
 Re-run the same `/goal` session with the CLAUDE.md patch in place. Check
 whether the advisory text is sufficient to trigger gbrain calls, or whether
 fix #3 (slim MCP server) is needed to overcome the deferred-tool friction.
+
+---
+
+## Experiment 2: `/goal` fails on spec character limit
+
+**Date:** 2026-05-16
+**Session ID:** `7839c8d6-9ed8-41a6-94f9-510f71c2e47f`
+**Project:** `/workspaces/goal-email-thread-count`
+**Duration:** ~40 seconds (15 log lines)
+
+### What we tried
+
+Ran `/goal goal-email-thread-count.md` on a new project spec for an email
+thread counter tool.
+
+### What happened
+
+The `/goal` command rejected the spec immediately:
+
+```
+Goal condition is limited to 4000 characters (got 4045)
+```
+
+The spec was 45 characters over the limit. The user ran `/exit` immediately
+after. Claude never got a turn to respond. Zero tool calls.
+
+### Tool histogram
+
+```
+  0  assistant/tool_use/*     ← no assistant messages at all
+  3  user (command payloads: /goal, error output, /exit)
+  3  system
+```
+
+### gbrain calls: ZERO
+
+No agent turn occurred, so gbrain could not have been invoked.
+
+### Observation
+
+The `/goal` command has a 4000-character limit on the spec file content. This
+is a hard gate enforced by the Claude Code harness before the agent gets
+control. Specs need to stay under this limit, or the goal file must reference
+an external spec rather than embedding the full content.
+
+---
+
+## Experiment 3: Goal announcement stub (no `/goal` command)
+
+**Date:** 2026-05-16
+**Session ID:** `aa5faea5-661d-4776-a7b1-f928d7dcf9ab`
+**Project:** `/workspaces/goal-email-thread-count`
+**Duration:** ~2.7 seconds (15 log lines)
+
+### What we tried
+
+User sent: "heads up, we're going to work on a goal now. just informing."
+
+### What happened
+
+Agent replied: "Got it, standing by for the goal. Ready when you are."
+One text response, zero tool calls. Session ended.
+
+### Tool histogram
+
+```
+  0  assistant/tool_use/*     ← zero tool calls
+  1  assistant/text
+  1  user/text
+```
+
+### gbrain calls: ZERO
+
+The gbrain tools were registered in `deferred_tools_delta` but the agent
+had no reason to invoke them on a single notification message. The signal-
+detector's "fire on every message" instruction was not followed, but this
+is a trivial case -- no substantive content to detect signals in.
+
+### Observation
+
+A "heads up" message with no actionable content does not trigger gbrain
+interaction. This is arguably correct behavior -- there is nothing to
+store. However, per the RESOLVER, signal-detector should still fire and
+determine there is nothing to capture (rather than not firing at all).
+
+---
+
+## Experiment 4: gbrain fires on conversational goal start
+
+**Date:** 2026-05-16
+**Session ID:** `9b03a158-10fa-473f-8355-ba3b857f49f9`
+**Project:** `/workspaces/goal-email-thread-count`
+**Duration:** ~69 seconds (46 log lines)
+
+### What we tried
+
+User said: "we're going to work on a goal now" (natural language, no `/goal`
+command). The project had a spec at `goal-email-thread-count.md` and a sample
+`.eml` file.
+
+### What happened
+
+The agent:
+1. Called `ToolSearch` to load gbrain MCP tool schemas
+2. Called `mcp__gbrain__search` with query `"email thread count"`
+3. Read the goal spec file
+4. Explored the sample `.eml` file with `Bash` (grepping for boundary markers)
+5. Was interrupted by the user mid-investigation
+
+No code was written. The agent was still in the discovery/analysis phase when
+interrupted.
+
+### Tool histogram
+
+```
+  4  assistant/tool_use/Bash
+  2  assistant/tool_use/Read
+  1  assistant/tool_use/ToolSearch     ← loaded gbrain schemas
+  1  assistant/tool_use/mcp__gbrain__search  ← SEARCHED THE BRAIN
+```
+
+### gbrain calls: 1
+
+| Tool | Input |
+|------|-------|
+| `mcp__gbrain__search` | `{"query": "email thread count"}` |
+
+### Why gbrain fired here but not in Experiment 1
+
+This is the key finding. The difference between this session and Experiment 1:
+
+| Factor | Experiment 1 (`/goal`) | Experiment 4 (conversational) |
+|--------|----------------------|-------------------------------|
+| Entry mode | `/goal` command with completion condition | Natural language prompt |
+| Execution pressure | High -- agent focused on completion gate | Low -- agent in exploration mode |
+| First action | Read spec, start coding | ToolSearch + brain search |
+| gbrain calls | 0 | 1 (search) |
+
+The `/goal` command creates a completion condition that the agent optimizes
+for, suppressing optional side-paths. A conversational prompt ("we're going
+to work on a goal now") does NOT create a completion gate, so the agent
+follows the CLAUDE.md instructions (including gbrain search) because there
+is no competing objective.
+
+This confirms the root cause from Experiment 1: **it is the `/goal` execution
+pressure that suppresses gbrain, not the instructions themselves.** When the
+same instructions are followed without `/goal` pressure, gbrain fires correctly.
+
+### Observation
+
+The `/workspaces/CLAUDE.md` patch (fix #4 from Experiment 1) may be
+effective for conversational goal sessions but insufficient for `/goal`
+sessions where the completion gate overrides advisory instructions. Fix #1
+(changing the `/goal` contract) remains necessary for `/goal`-mode sessions.
+
+---
+
+## Experiment 5: `/init` skill runs instead of `/goal`
+
+**Date:** 2026-05-16
+**Session ID:** `9cacd941-807c-4f7c-9bad-15fe9ad9d23d`
+**Project:** `/workspaces/goal-email-thread-count`
+**Duration:** ~2 minutes (37 log lines)
+
+### What we tried
+
+User mentioned they wanted to work on the goal and use the `/goal` skill.
+
+### What happened
+
+The agent ran the `/init` skill (via `Skill` tool) instead of `/goal`, then
+dispatched an `Agent` subagent, read the spec and CLAUDE.md, and updated
+CLAUDE.md with a project overview and spec summary. No implementation work.
+No brain writes.
+
+### Tool histogram
+
+```
+  2  assistant/tool_use/Read
+  1  assistant/tool_use/ToolSearch
+  1  assistant/tool_use/Skill (/init)
+  1  assistant/tool_use/Agent
+  1  assistant/tool_use/Edit
+```
+
+### gbrain calls: ZERO
+
+`ToolSearch` was called (loading gbrain schemas), but no `mcp__gbrain__*`
+tool was invoked. The agent loaded the schemas but did not use them.
+
+### Why gbrain didn't fire
+
+The `/init` skill took over the session. It has its own workflow (read the
+repo, update CLAUDE.md with project info) that does not include brain
+writes. The agent followed the `/init` skill instructions faithfully,
+which is the correct behavior for skill execution, but `/init` does not
+include any gbrain interaction.
+
+### Observation
+
+When a skill (like `/init`) takes control of the session, it supersedes
+the gbrain instructions in CLAUDE.md. Skills define their own tool
+sequences and do not check the brain. This is a third mode of failure
+distinct from Experiments 1 and 4:
+
+1. **`/goal` mode** -- completion pressure suppresses brain (Experiment 1)
+2. **Conversational mode** -- brain fires correctly (Experiment 4)
+3. **Skill mode** -- skill workflow supersedes brain instructions (Experiment 5)
+
+For gbrain to fire during skill execution, individual skills would need
+to include brain read/write steps in their own workflows.
+
+---
+
+## Cross-experiment summary
+
+| # | Session | Mode | Duration | Tool calls | gbrain calls | Brain fired? |
+|---|---------|------|----------|------------|-------------|-------------|
+| 1 | `94bb5cda` | `/goal` | ~30min | 85 | 0 | No |
+| 2 | `7839c8d6` | `/goal` (failed) | 40s | 0 | 0 | N/A (no agent turn) |
+| 3 | `aa5faea5` | Conversational (stub) | 2.7s | 0 | 0 | No (nothing to detect) |
+| 4 | `9b03a158` | Conversational | 69s | 8 | 1 (search) | **Yes** |
+| 5 | `9cacd941` | Skill (`/init`) | 2min | 6 | 0 | No |
+
+### Key finding
+
+gbrain fires in exactly ONE mode: **conversational prompts without a
+competing execution framework** (no `/goal` gate, no skill workflow).
+
+Three distinct suppression mechanisms observed:
+1. `/goal` completion pressure overrides advisory brain instructions
+2. Skill workflows (e.g. `/init`) supersede CLAUDE.md brain instructions
+3. Deferred MCP tools add friction (but ToolSearch is called when there is no competing pressure)
+
+### Implication for fixes
+
+Fix #4 (CLAUDE.md policy) is likely effective only for conversational
+mode. For `/goal` and skill modes, enforcement must be built into the
+execution framework itself (fix #1) or into individual skill workflows.
