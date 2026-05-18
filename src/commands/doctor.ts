@@ -1375,7 +1375,7 @@ export async function runDoctor(engine: BrainEngine | null, args: string[], dbSo
   try {
     const health = await engine.getHealth();
     const entityCount = (await engine.executeRaw<{ count: number }>(
-      "SELECT COUNT(*)::int AS count FROM pages WHERE type IN ('entity', 'person', 'company', 'organization')",
+      "SELECT COUNT(*)::int AS count FROM pages WHERE type IN ('entity', 'person', 'company', 'organization', 'goal', 'decision', 'process', 'concept')",
     ))[0]?.count ?? 0;
 
     const linkPct = ((health.link_coverage ?? 0) * 100).toFixed(0);

@@ -22,8 +22,11 @@ Every fact written to a brain page must carry an inline `[Source: ...]` citation
 
 ## Back-Linking (MANDATORY)
 
-Every mention of a person or company WITH a brain page MUST create a back-link
-FROM that entity's page TO the page mentioning them.
+Every mention of an entity WITH a brain page MUST create a back-link
+FROM that entity's page TO the page mentioning it.
+
+Entities: goals, decisions, processes, concepts — any page in a recognized
+entity directory.
 
 Format: `- **YYYY-MM-DD** | Referenced in [page title](path) -- context`
 
@@ -33,8 +36,11 @@ An unlinked mention is a broken brain.
 
 Before creating a new brain page, check notability:
 
-- **People:** Will you interact again? Relevant to work/interests?
-- **Companies:** Relevant to work/investments/interests?
-- **Concepts:** Reusable mental model? Worth referencing again?
+- **Goals:** Is this a distinct execution arc worth documenting? (Not a sub-step of an existing goal)
+- **Decisions:** Does this choice govern future work beyond the current goal?
+- **Processes:** Is this repeatable and handoff-worthy? (Not a one-off sequence)
+- **Concepts:** Reusable across goals? Stable? Non-procedural? (If it's steps, it's a process)
 
-When in doubt, DON'T create. A 400-follower person who tweeted once is not notable.
+When in doubt, capture in the current goal page first. Promote to its own page
+only when reuse is clear. A missing page can be created later. A junk page
+wastes attention and degrades search quality.
